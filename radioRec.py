@@ -15,6 +15,8 @@ class RecordThread(threading.Thread):
         threading.Thread.__init__(self)
         self.localtime = time.localtime()
         self.localtimestr = time.strftime("%Y-%m-%d-%H-%M-%S",self.localtime)
+        self.starttime = 0
+        self.stoptime = 0
         self.bRecord = True
         self.chunk = 1024
         self.format = pyaudio.paInt16
@@ -37,14 +39,11 @@ class RecordThread(threading.Thread):
         xx = 0
         yy = 0
         alltime = 0
-        starttime = 0
-        stoptime = 0
         timediff = 0
 
         # srt top center
-        self.srt("{}\n0:00:00,000 --> 0:00:10,000\n{{\\an8}}<font color=#FFFF00>录制日期：{}</font>\n".format(str(rt.line),str(time.strftime("%Y-%m-%d",rt.localtime))))
-        # srt mid center
-        self.srt("{}\n0:00:00.000 --> 0:00:10.000\n{{\\an5}}请遵守<font color=#FF0000><u><b>《中华人民共和国无线电管理条例》</b></u></font>\n".format(str(rt.line)))
+        self.srt("{}\n00:00:00,000 --> 00:00:05,000\n{{\\an8}}<font color=#FFFF00>录制日期：{}</font>".format(str(rt.line),str(time.strftime("%Y-%m-%d",rt.localtime))))
+        self.srt("{\\an5}请遵守<font color=#FF0000><u><b>《中华人民共和国无线电管理条例》</b></u></font>\n")
         print("RUN ...... Start at {}".format(rt.localtimestr))
 
         while self.bRecord:
@@ -63,22 +62,22 @@ class RecordThread(threading.Thread):
             if xx > yy:
                 yy = 1
                 #START
-                starttime = time.time()
+                self.starttime = time.time()
                 alltime = round(alltime + timediff,3)
                 print("{:03d} StartTime: {} Timestamp: {}".format(
-                    self.line, time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(starttime)), timestr(alltime)))
+                    self.line, time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(self.starttime)), timestr(alltime)))
             if xx < yy:
                 yy = 0
                 #STOP
-                stoptime = time.time()
-                timediff = round(stoptime - starttime,3)
+                self.stoptime = time.time()
+                timediff = round(self.stoptime - self.starttime,3)
                 
                 self.srt("{}\n{} --> {}\n<font color=#5F9F9F>{}  ->  {}</font>\n<font color=#4D4DFF>{}</font>\n".format(
-                    str(self.line),timestr(alltime),timestr(alltime+timediff),
-                    time.strftime("%H:%M:%S",time.localtime(starttime)),time.strftime("%H:%M:%S",time.localtime(stoptime)),timestr(timediff)))
+                    str(self.line),timestr(alltime+0.001),timestr(alltime+timediff-0.001),
+                    time.strftime("%H:%M:%S",time.localtime(self.starttime)),time.strftime("%H:%M:%S",time.localtime(self.stoptime)),timestr(timediff)))
                 self.line = self.line + 1
                 print("    StopTime:  {} Timestamp: {}".format(
-                    time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(stoptime)), timestr(alltime+timediff)))
+                    time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(self.stoptime)), timestr(alltime+timediff)))
                 print("    Duration: {}\n".format(timestr(timediff)))
         # out of while loop - clean up
         self.wavstream.stop_stream()
@@ -90,6 +89,8 @@ class RecordThread(threading.Thread):
     def srt(self, msg):
         self.srtFile.write(msg+"\n")
         self.srtFile.flush()
+
+
 
 def abslist(a):
     return list(map(abs,a))
@@ -111,8 +112,8 @@ if __name__ == '__main__':
         while True:
             time.sleep(60)
             localtime = time.localtime()
-            if localtime.tm_hour == 00 and localtime.tm_min == 00:
-                # Reload instance at midnight
+            if (rt.stoptime > 0 and time.time() - rt.stoptime > 1800 ): # if quiet over x seconds
+                # restart record
                 rt.bRecord = False
                 rt = RecordThread()
                 rt.start()
