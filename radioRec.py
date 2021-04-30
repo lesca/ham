@@ -1,6 +1,5 @@
 # Record microphone input waves into wav file, cut off quiets automatically
-# based on Joie_Yu's efforts on this website:
-# https://my.oschina.net/u/3404800/blog/3017039
+# based on Joie_Yu's efforts on this website: https://my.oschina.net/u/3404800/blog/3017039
 
 import threading
 import pyaudio
@@ -66,35 +65,37 @@ class RecordThread(threading.Thread):
                 #START
                 starttime = time.time()
                 alltime = round(alltime + timediff,3)
-
-                log("StartTime: "+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(starttime))+"    ............: "+timestr(alltime))
-                print("StartTime: "+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(starttime))+"    ............: "+timestr(alltime))
+                
+                log("StartTime: "+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(starttime))+"    开始时间: "+timestr(alltime))
+                print("StartTime: "+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(starttime))+"    开始时间: "+timestr(alltime))
             if xx < yy:
                 yy = 0
                 #STOP
                 stoptime = time.time()
                 timediff = round(stoptime - starttime,3)
-                                                                                                                                                                                                                                                                                            srt(str(line)+"\n"+timestr(alltime)+" --> "+timestr(alltime+timediff)+"\n"+"<font color=#5F9F9F>"+time.strftime("%H:%M:%S",time.localtime(starttime))+"  ->  "+time.strftime("%H:%M:%S",time.localtime(stoptime))+"</font> "+"\n"+"<font color=#4D4DFF>"+tim                line = line + 1
-                log("StopTime:  "+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(stoptime))+"    ............: "+timestr(alltime+timediff)+"\n")
-                print("StopTime:  "+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(stoptime))+"    ............: "+timestr(alltime+timediff))
-                print("......: "+timestr(timediff)+"\n")
-
+                
+                srt(str(line)+"\n"+timestr(alltime)+" --> "+timestr(alltime+timediff)+"\n"+"<font color=#5F9F9F>"+time.strftime("%H:%M:%S",time.localtime(starttime))+"  ->  "+time.strftime("%H:%M:%S",time.localtime(stoptime))+"</font> "+"\n"+"<font color=#4D4DFF>"+timestr(timediff)+"</font>"+"\n")
+                line = line + 1
+                log("StopTime:  "+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(stoptime))+"    结束时间: "+timestr(alltime+timediff)+"\n")
+                print("StopTime:  "+time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(stoptime))+"    结束时间: "+timestr(alltime+timediff))
+                print("时长: "+timestr(timediff)+"\n")
+                 
         wavstream.stop_stream()
         wavstream.close()
         audio.terminate()
-
+        
     def stoprecord(self):
         print("stop")
         self.bRecord = False
-
+        
     def pause(self):
         print("pause")
         self.rr = False
-
+       
     def next(self):
         print("next")
         self.rr = True
-
+        
 def abslist(a):
     return list(map(abs,a))
 def mean(a):
@@ -110,12 +111,12 @@ def srt(msg):
         file.write(msg+"\n")
         file.close()
 
-
+        
 def timestr(sec):
     m,s = divmod(sec,60)
     h,m = divmod(m,60)
     return "{:02d}:{:02d}:{:02d},{:03d}".format(int(h),int(m),int(s),int((s-int(s))*1000))
-
+    
 rt = RecordThread()
 line = line + 1
 
