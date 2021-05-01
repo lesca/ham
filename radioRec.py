@@ -42,9 +42,10 @@ class RecordThread(threading.Thread):
         timediff = 0
 
         # srt top center
-        self.srt("{}\n00:00:00,000 --> 00:00:05,000\n{{\\an8}}<font color=#FFFF00>录制日期：{}</font>".format(str(rt.line),str(time.strftime("%Y-%m-%d",rt.localtime))))
-        self.srt("{\\an5}请遵守<font color=#FF0000><u><b>《中华人民共和国无线电管理条例》</b></u></font>\n")
-        print("RUN ...... Start at {}".format(rt.localtimestr))
+        self.srt("{}\n00:00:00,000 --> 00:00:01,000\n<font color=#FFFF00>录制日期：{}</font>".format(str(rt.line),str(time.strftime("%Y-%m-%d",rt.localtime))))
+        self.srt("请遵守<font color=#FF0000><u><b>《中华人民共和国无线电管理条例》</b></u></font>\n")
+        self.line = self.line + 1
+        print("RUNNING ... Started at {}".format(rt.localtimestr))
 
         while self.bRecord:
             data = self.wavstream.read(self.chunk*5)
